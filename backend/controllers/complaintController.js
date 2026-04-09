@@ -37,7 +37,7 @@ export const raiseComplaint = async (req, res) => {
     const io = req.app.get("io");
 
 io.emit("newComplaint", {
-  message: `📢 New complaint raised: ${complaint.title}`
+  message: `📢 New  Issue reported: ${complaint.title}`
 });
 
     res.status(201).json({
@@ -134,7 +134,7 @@ export const updateComplaintStatus = async (req, res) => {
     const io = req.app.get("io");
 
 io.emit("complaintResolved", {
-  message: `✅ Complaint resolved: ${complaint.title}`
+  message: `✅ Issue resolved: ${complaint.title}`
 });
 
     res.status(200).json({

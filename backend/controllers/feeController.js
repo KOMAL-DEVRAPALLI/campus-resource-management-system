@@ -301,11 +301,11 @@ export const updateFeeStatus = async (req, res) => {
     const io = req.app.get("io");
 
     io.emit("paymentSuccess", {
-      message: `💰 ${fee.studentId.name} paid ₹${fee.amount} for ${fee.month}`
+      message: `💰 Booking confirmed for ${fee.studentId.name} of ₹${fee.amount} for ${fee.month}`
     });
 
     res.status(200).json({
-      message: "Payment successful",
+      message: "Booking payment successful",
       data: fee
     });
 

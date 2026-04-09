@@ -1,189 +1,190 @@
 import Room from "../models/roomModel.js";
 
-
-
-// ================= ADD ROOM =================
+/* ================= ADD RESOURCE ================= */
 
 export const addRoom = async (req, res) => {
   try {
 
-    const { roomNumber, capacity } = req.body;
+    const { roomNumber, capacity, type } = req.body;
 
     if (!roomNumber || !capacity) {
       return res.status(400).json({
-        message: "All fields required",
+        message: "All fields required"
       });
     }
 
     if (capacity <= 0) {
       return res.status(400).json({
-        message: "Capacity must be greater than 0",
+        message: "Capacity must be greater than 0"
       });
     }
 
-    const existingRoom = await Room.findOne({
-      roomNumber,
-    });
+    const existing = await Room.findOne({ roomNumber });
 
-    if (existingRoom) {
+    if (existing) {
       return res.status(400).json({
-        message: "Room number already exists",
+        message: "Resource already exists"
       });
     }
 
-    const room = await Room.create({
+    const resource = await Room.create({
       roomNumber,
       capacity,
+      type: type || "General",
       occupiedCount: 0,
+      status: "active"
     });
 
     res.status(201).json({
-      message: "Room added",
-      data: room,
+      message: "Resource added successfully",
+      data: resource
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error adding room",
+      message: error.message
     });
-
   }
 };
 
 
-
-// ================= GET ALL ROOMS =================
+/* ================= GET ALL RESOURCES ================= */
 
 export const getAllRooms = async (req, res) => {
   try {
 
-    const rooms = await Room.find();
+    const resources = await Room.find();
 
-    res.status(200).json(rooms);
+    // ✅ Add computed status (smart logic)
+    const updated = resources.map(r => {
 
-  } catch (error) {
+      let utilizationStatus = "available";
 
-    res.status(500).json({
-      message: "Error fetching rooms",
+      if (r.occupiedCount === 0) {
+        utilizationStatus = "available";
+      } else if (r.occupiedCount < r.capacity) {
+        utilizationStatus = "in-use";
+      } else {
+        utilizationStatus = "full";
+      }
+
+      return {
+        ...r._doc,
+        utilizationStatus
+      };
     });
 
+    res.status(200).json(updated);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching resources"
+    });
   }
 };
 
 
-
-// ================= UPDATE ROOM =================
+/* ================= UPDATE RESOURCE ================= */
 
 export const updateRoom = async (req, res) => {
   try {
 
     const { id } = req.params;
-    const { roomNumber, capacity } = req.body;
+    const { roomNumber, capacity, type } = req.body;
 
-    const room = await Room.findById(id);
+    const resource = await Room.findById(id);
 
-    if (!room) {
+    if (!resource) {
       return res.status(404).json({
-        message: "Room not found",
+        message: "Resource not found"
       });
     }
 
+    // 🔁 Duplicate check
+    if (roomNumber && roomNumber !== resource.roomNumber) {
 
-    // check duplicate number
-    if (
-      roomNumber &&
-      roomNumber !== room.roomNumber
-    ) {
-      const duplicate = await Room.findOne({
-        roomNumber,
-      });
+      const duplicate = await Room.findOne({ roomNumber });
 
       if (duplicate) {
         return res.status(400).json({
-          message: "Room number exists",
+          message: "Resource name already exists"
         });
       }
 
-      room.roomNumber = roomNumber;
+      resource.roomNumber = roomNumber;
     }
 
-
-    // capacity validation
+    // 🔁 Capacity validation
     if (capacity !== undefined) {
 
       if (capacity <= 0) {
         return res.status(400).json({
-          message: "Capacity must be > 0",
+          message: "Capacity must be greater than 0"
         });
       }
 
-      if (capacity < room.occupiedCount) {
+      if (capacity < resource.occupiedCount) {
         return res.status(400).json({
-          message:
-            "Capacity less than occupied",
+          message: "Capacity cannot be less than usage"
         });
       }
 
-      room.capacity = capacity;
+      resource.capacity = capacity;
     }
 
+    // 🔁 Update type
+    if (type) {
+      resource.type = type;
+    }
 
-    await room.save();
+    await resource.save();
 
     res.status(200).json({
-      message: "Room updated",
-      data: room,
+      message: "Resource updated successfully",
+      data: resource
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error updating room",
+      message: error.message
     });
-
   }
 };
 
 
-
-// ================= DEACTIVATE ROOM =================
+/* ================= DEACTIVATE RESOURCE ================= */
 
 export const deactivateRoom = async (req, res) => {
   try {
 
     const { id } = req.params;
 
-    const room = await Room.findById(id);
+    const resource = await Room.findById(id);
 
-    if (!room) {
+    if (!resource) {
       return res.status(404).json({
-        message: "Room not found",
+        message: "Resource not found"
       });
     }
 
-    if (room.occupiedCount > 0) {
+    if (resource.occupiedCount > 0) {
       return res.status(400).json({
-        message:
-          "Cannot deactivate room with students",
+        message: "Cannot deactivate resource in use"
       });
     }
 
-    room.status = "inactive";
+    resource.status = "inactive";
 
-    await room.save();
+    await resource.save();
 
     res.status(200).json({
-      message: "Room deactivated",
-      data: room,
+      message: "Resource deactivated",
+      data: resource
     });
-console.log("Deactivate room id:", id);
-console.log("Room before update:", room);
+
   } catch (error) {
-
     res.status(500).json({
-      message: "Error deactivating room",
+      message: error.message
     });
-
   }
 };
