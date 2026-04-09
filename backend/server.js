@@ -1,0 +1,74 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+
+import connectDB from "./config/db.js";
+
+import paymentRoutes from "./routes/paymentRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import roomRoutes from "./routes/roomRoutes.js";
+import feeRoutes from "./routes/feeRoutes.js";
+import complaintRoutes from "./routes/complaintRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import chartRoutes from "./routes/chartRoutes.js";
+
+const app = express();
+
+// ================= CONNECT DB =================
+connectDB();
+
+// ================= MIDDLEWARE =================
+app.use(cors({
+  origin: "*", // 🔥 change to frontend URL in production
+}));
+
+app.use(express.json());
+
+// ================= CREATE SERVER =================
+const server = http.createServer(app);
+
+// ================= SOCKET.IO =================
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  },
+  transports: ["websocket"], // 🔥 important for Render
+});
+
+// connection event
+io.on("connection", (socket) => {
+  console.log("✅ User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
+  });
+});
+
+// 👉 make io accessible in controllers
+app.set("io", io);
+
+// ================= TEST ROUTE =================
+app.get("/test", (req, res) => {
+  res.send("API working");
+});
+
+// ================= ROUTES =================
+app.use("/api/auth", authRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/fees", feeRoutes);
+app.use("/api/complaints", complaintRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/chart", chartRoutes);
+
+// ================= SERVER =================
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
