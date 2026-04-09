@@ -21,7 +21,8 @@ const FeeDashboard = () => {
   const [amount, setAmount] = useState("");
   const [bulkMonth, setBulkMonth] = useState("");
   const [bulkAmount, setBulkAmount] = useState("");
-
+  const [bookingDate, setBookingDate] = useState("")
+  const [timeSlot, setTimeSlot] = useState("")
   // console.log("🔥 FeeDashboard mounted");
   // console.log("ROLE:", role);
 
@@ -312,7 +313,18 @@ const handleStatusToggle = async (fee) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
+<input
+  type="date"
+  value={bookingDate}
+  onChange={(e) => setBookingDate(e.target.value)}
+/>
 
+<input
+  type="text"
+  placeholder="Time Slot (e.g. 10 AM - 12 PM)"
+  value={timeSlot}
+  onChange={(e) => setTimeSlot(e.target.value)}
+/>
               <button style={btn} onClick={handleAddBill}>
                 Generate Bill
               </button>
