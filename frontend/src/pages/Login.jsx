@@ -77,7 +77,7 @@ const LoginPage = () => {
 
       <div style={cardStyle}>
 
-        <h2 style={titleStyle}>Hostel Management</h2>
+        <h2 style={titleStyle}>Resource Management System</h2>
         <p style={subtitleStyle}>Login to continue</p>
 
         {error && <div style={errorStyle}>{error}</div>}
