@@ -28,7 +28,7 @@ const FeeDashboard = () => {
 
   // ================= SOCKET =================
  useEffect(() => {
-  const socket = io("https://backend-qlmf.onrender.com", {
+  const socket = io("https://campusbackend-p1f4.onrender.com", {
     transports: ["websocket"],
   });
 

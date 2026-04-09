@@ -147,7 +147,7 @@ setChartData(dashboard)
       <div style={headerSection}>
         <h1 style={pageTitle}>Admin Dashboard</h1>
         <p style={subtitle}>
-          Overview of hostel management system
+          Overview of Resource management system
         </p>
       </div>
 

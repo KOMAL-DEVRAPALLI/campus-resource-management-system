@@ -45,7 +45,7 @@ const StudentDashboard = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY,
         amount: order.amount,
         currency: "INR",
-        name: "Hostel Fees",
+        name: "Resource billing",
         order_id: order.id,
 
         handler: async function (response) {
