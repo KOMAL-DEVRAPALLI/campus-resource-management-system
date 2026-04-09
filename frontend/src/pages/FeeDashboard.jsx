@@ -62,7 +62,7 @@ const toggleStudent = (studentId) => {
       setFees(data);
     
     } catch {
-      toast.error("Failed to fetch fees");
+      toast.error("Failed to fetch bills");
     }
   };
 
@@ -71,7 +71,7 @@ const toggleStudent = (studentId) => {
       const data = await apiGet(API.STUDENTS.ALL);
       setStudents(data);
     } catch {
-      toast.error("Failed to fetch students");
+      toast.error("Failed to fetch users");
     }
   };
 
@@ -98,7 +98,7 @@ const toggleStudent = (studentId) => {
         key: import.meta.env.VITE_RAZORPAY_KEY,
         amount: order.amount,
         currency: "INR",
-        name: "Hostel Fees",
+        name: "Resource Booking",
         order_id: order.id,
 
         handler: async (response) => {
@@ -112,13 +112,13 @@ const toggleStudent = (studentId) => {
         },
       };
  if (!window.Razorpay) {
-  toast.error("Payment system not loaded");
+  toast.error("Booking system not loaded");
   setLoadingId(null); // 🔥 missing
   return;
 }
       const rzp = new window.Razorpay(options);
     rzp.on("payment.failed", () => {
-  toast.error("Payment failed");
+  toast.error("Booking failed");
   setLoadingId(null);
 });
 
@@ -126,7 +126,7 @@ const toggleStudent = (studentId) => {
 
     } catch (err) {
   console.error(err);
-  toast.error("Payment failed. Try again");
+  toast.error("Booking failed. Try again");
   setLoadingId(null); // 🔥 important
 }
   };
@@ -194,10 +194,12 @@ const handleStatusToggle = async (fee) => {
 
       await apiRequest(API.FEES.BULK_GENERATE, "POST", {
         month: bulkMonth.trim().toLowerCase(),
-        amount: Number(bulkAmount) // ✅ FIXED
+        amount: Number(bulkAmount) ,// ✅ FIXED,
+        bookingDate,
+        timeSlot
       });
 
-      toast.success("Bulk bills generated");
+      toast.success("Bulk booking generated");
 
       setBulkMonth("");
       setBulkAmount("");
@@ -224,10 +226,12 @@ const handleStatusToggle = async (fee) => {
       await apiRequest(API.FEES.ALL, "POST", {
         studentId: userId,
         month,
-        amount
+        amount,
+        bookingDate,
+        timeSlot
       });
 
-      toast.success("Bill generated");
+      toast.success("Booking generated");
 
       setUserId("");
       setMonth("");
@@ -248,7 +252,7 @@ const handleStatusToggle = async (fee) => {
     <div style={wrapper}>
 
       <p style={{ color: "#666" }}>
-        Manage student fee records and payments
+        Manage resource bookings and payments
       </p>
 
       {/* ===== STATS ===== */}
@@ -263,7 +267,7 @@ const handleStatusToggle = async (fee) => {
           <div style={forms}>
 
             <div style={box}>
-              <h3>Bulk Billing</h3>
+              <h3>Bulk Booking</h3>
 
               <input
                 style={input}
@@ -280,12 +284,12 @@ const handleStatusToggle = async (fee) => {
               />
 
               <button style={btn} onClick={handleBulkGenerate}>
-                Generate Bills
+                Generate Bookings
               </button>
             </div>
 
             <div style={box}>
-              <h3>Single Billing</h3>
+              <h3>Single Booking</h3>
 
               <select
                 style={input}
@@ -335,7 +339,7 @@ const handleStatusToggle = async (fee) => {
       {/* ================= ADMIN VIEW ================= */}
       {role === "admin" && (
         <div style={sectionCard}>
-          <h3>All Fees</h3>
+          <h3>All Bookings</h3>
 
           <select
             style={input}
@@ -395,7 +399,8 @@ overflowY: "auto",
   <div key={fee._id} style={cardItem}>
     <div style={feeRow}>
       <span style={{ fontWeight: "600" }}>{fee.month}</span>
-
+      <span style={fee.bookingDate ? fee.bookingDate.split("T")[0]:"-"}></span>
+      <span>{fee.timeSlot|| "-"}</span>
       <span>₹ {fee.amount}</span>
 
       <span style={statusStyle(fee.status)}>
@@ -437,7 +442,7 @@ overflowY: "auto",
     <h3>Your Fee History</h3>
 
     {studentFees.length === 0 ? (
-      <p>No fees found</p>
+      <p>No bookings found</p>
     ) : (
       studentFees.map((fee) => (
        <div key={fee._id} style={feeRow}>
@@ -488,7 +493,7 @@ const clickableHeader = {
 };
 const feeRow = {
   display: "grid",
-  gridTemplateColumns: "1.5fr 1fr 1fr 1fr",
+  gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1fr",
   alignItems: "center",
   padding: "12px 10px",
   borderBottom: "1px solid #eee",
