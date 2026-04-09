@@ -67,7 +67,7 @@ const AddStudentPage = () => {
       // ✅ CENTRALIZED API
       await apiRequest(API.STUDENTS.ALL, "POST", formData);
 
-      toast.success("Student added successfully");
+      toast.success("User added successfully");
       setFormData({
   name: "",
   phone: "",
@@ -93,12 +93,12 @@ const AddStudentPage = () => {
           style={styles.backBtn}
           onClick={() => navigate("/students")}
         >
-          ← Back to Students
+          ← Back to Users
         </button>
 
         <h2 style={styles.title}>
           <FaUserPlus style={{ marginRight: "8px" }} />
-          Add Student
+          Add Users
         </h2>
 
         <hr />
@@ -109,7 +109,7 @@ const AddStudentPage = () => {
             style={inputStyle}
             type="text"
             name="name"
-            placeholder="Student Name"
+            placeholder="User Name"
             value={formData.name}
             onChange={handleChange}
           />
@@ -150,7 +150,7 @@ const AddStudentPage = () => {
             }}
             disabled={loading}
           >
-            {loading ? "Adding..." : "Add Student"}
+            {loading ? "Adding..." : "Add User"}
           </button>
 
         </form>

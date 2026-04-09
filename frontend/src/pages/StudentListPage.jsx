@@ -87,7 +87,7 @@ const StudentListPage = () => {
         prev.filter(s => s._id !== selectedId)
       );
 
-      toast.success("Student deactivated");
+      toast.success("User deactivated");
 
     } catch (error) {
       toast.error(error.message);
@@ -101,7 +101,7 @@ const StudentListPage = () => {
   const handleAllocateRoom = async () => {
 
     if (!selectedStudentId || !selectedRoomId) {
-      toast.error("Select student and room");
+      toast.error("Select user and resources");
       return;
     }
 
@@ -186,14 +186,14 @@ const StudentListPage = () => {
 
       <div style={tableContainer}>
 
-        <h2>Student Management</h2>
+        <h2>User Management</h2>
 
         {loading ? (
-          <p>Loading students...</p>
+          <p>Loading users...</p>
         ) : (
           <>
             <Link to="/students/add">
-              <button style={buttonPrimary}>Add Student</button>
+              <button style={buttonPrimary}>Add User</button>
             </Link>
 
             <br /><br />
@@ -208,7 +208,7 @@ const StudentListPage = () => {
               />
 
               {filteredStudents.length === 0 ? (
-                <p>No students found</p>
+                <p>No user found</p>
               ) : (
                 <table style={tableStyle}>
 
@@ -217,7 +217,7 @@ const StudentListPage = () => {
                       <th style={thStyle}>Name</th>
                       <th style={thStyle}>Phone</th>
                       <th style={thStyle}>Status</th>
-                      <th style={thStyle}>Room</th>
+                      <th style={thStyle}>Resiurce</th>
                       <th style={thStyle}>Action</th>
                     </tr>
                   </thead>
@@ -269,7 +269,7 @@ const StudentListPage = () => {
                                 style={buttonInfoSmall}
                                 onClick={() => handleDeallocate(student._id)}
                               >
-                                Remove Room
+                                Remove Resource
                               </button>
                             )}
 
@@ -297,7 +297,7 @@ const StudentListPage = () => {
                 onChange={(e) => setSelectedStudentId(e.target.value)}
                 style={inputStyle}
               >
-                <option value="">Select Student</option>
+                <option value="">Select User</option>
                 {students.filter(s => !s.roomId).map(s => (
                   <option key={s._id} value={s._id}>{s.name}</option>
                 ))}
@@ -336,7 +336,7 @@ const StudentListPage = () => {
 
         <ConfirmDialog
           open={confirmOpen}
-          title="Deactivate Student"
+          title="Deactivate User"
           message="Are you sure?"
           onConfirm={confirmDeactivate}
           onCancel={() => setConfirmOpen(false)}

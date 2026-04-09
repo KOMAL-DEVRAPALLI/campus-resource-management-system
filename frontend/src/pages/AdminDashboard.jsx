@@ -157,9 +157,9 @@ setChartData(dashboard)
         <>
           {/* ===== STATS ===== */}
           <div style={cardContainer}>
-            <StatCard title="Total Students" value={stats.students} gradient="linear-gradient(135deg, #3b82f6, #2563eb)" icon={<FaUsers size={28} />} />
-            <StatCard title="Active Rooms" value={stats.rooms} gradient="linear-gradient(135deg, #22c55e, #16a34a)" icon={<FaBed size={28} />} />
-            <StatCard title="Unpaid Fees" value={stats.unpaid} gradient="linear-gradient(135deg, #f59e0b, #d97706)" icon={<FaMoneyBillWave size={28} />} />
+            <StatCard title="Total Users" value={stats.students} gradient="linear-gradient(135deg, #3b82f6, #2563eb)" icon={<FaUsers size={28} />} />
+            <StatCard title="Active Resources" value={stats.rooms} gradient="linear-gradient(135deg, #22c55e, #16a34a)" icon={<FaBed size={28} />} />
+            <StatCard title="Unpaid Bookings" value={stats.unpaid} gradient="linear-gradient(135deg, #f59e0b, #d97706)" icon={<FaMoneyBillWave size={28} />} />
             <StatCard title="Open Complaints" value={stats.complaints} gradient="linear-gradient(135deg, #ef4444, #dc2626)" icon={<FaExclamationCircle size={28} />} />
           </div>
 
@@ -220,7 +220,7 @@ setChartData(dashboard)
                 onClick={() => setConfirmOpen(true)}
                 disabled={loadingAction}
               >
-                {loadingAction ? "Processing..." : "Auto Allocate All Students"}
+                {loadingAction ? "Processing..." : "Auto Allocate All Users"}
               </button>
 
               <button
@@ -237,7 +237,7 @@ setChartData(dashboard)
       <ConfirmDialog
         open={confirmOpen}
         title="Auto Allocate Students"
-        message="Are you sure you want to allocate all students automatically?"
+        message="Are you sure you want to allocate all users automatically?"
         onConfirm={confirmAutoAllocate}
         onCancel={() => setConfirmOpen(false)}
       />
