@@ -14,30 +14,27 @@ import {
 import toast from "react-hot-toast";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 
-const RoomManagement = () => {
+const ResourceManagement = () => {
 
   const [rooms, setRooms] = useState([]);
 
-  const [roomNumber, setRoomNumber] = useState("");
+  const [resourceName, setResourceName] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [type, setType] = useState("General");
 
   const [editId, setEditId] = useState(null);
-
   const [loading, setLoading] = useState(false);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-
-  // ---------- FETCH ROOMS ----------
-
+  // ================= FETCH =================
   const fetchRooms = async () => {
     try {
       const data = await apiGet(API.ROOMS.ALL);
       setRooms(data);
     } catch (error) {
-      console.error(error);
-      toast.error(error.message);
+      toast.error("Failed to fetch resources");
     }
   };
 
@@ -45,13 +42,15 @@ const RoomManagement = () => {
     fetchRooms();
   }, []);
 
-
-  // ---------- ADD ROOM ----------
-
-  const handleAddRoom = async () => {
-
-    if (!roomNumber || !capacity) {
+  // ================= ADD =================
+  const handleAdd = async () => {
+    if (!resourceName || !capacity) {
       toast.error("All fields required");
+      return;
+    }
+
+    if (capacity <= 0) {
+      toast.error("Capacity must be greater than 0");
       return;
     }
 
@@ -59,15 +58,14 @@ const RoomManagement = () => {
       setLoading(true);
 
       await apiRequest(API.ROOMS.ALL, "POST", {
-        roomNumber,
-        capacity
+        resourceName,
+        capacity,
+        type
       });
 
-      toast.success("Room created");
+      toast.success("Resource added");
 
-      setRoomNumber("");
-      setCapacity("");
-
+      resetForm();
       fetchRooms();
 
     } catch (error) {
@@ -75,63 +73,53 @@ const RoomManagement = () => {
     } finally {
       setLoading(false);
     }
-
   };
 
-
-  // ---------- EDIT ROOM ----------
-
+  // ================= EDIT =================
   const handleEdit = (room) => {
-    setRoomNumber(room.roomNumber);
+    setResourceName(room.resourceName);
     setCapacity(room.capacity);
+    setType(room.type || "General");
     setEditId(room._id);
   };
 
-
-  // ---------- UPDATE ROOM ----------
-
+  // ================= UPDATE =================
   const handleUpdate = async () => {
     try {
+      setLoading(true);
 
       await apiRequest(`${API.ROOMS.ALL}/${editId}`, "PUT", {
-        roomNumber,
-        capacity
+        resourceName,
+        capacity,
+        type
       });
 
-      toast.success("Room updated successfully");
+      toast.success("Resource updated");
 
-      setRoomNumber("");
-      setCapacity("");
-      setEditId(null);
-
+      resetForm();
       fetchRooms();
 
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  // ---------- OPEN CONFIRM ----------
-
+  // ================= DELETE =================
   const openDeactivateDialog = (id) => {
     setSelectedId(id);
     setConfirmOpen(true);
   };
 
-
-  // ---------- CONFIRM DEACTIVATE ----------
-
   const confirmDeactivate = async () => {
     try {
-
       await apiRequest(
         `${API.ROOMS.ALL}/${selectedId}/deactivate`,
         "PATCH"
       );
 
-      toast.success("Room deactivated");
-
+      toast.success("Resource deactivated");
       fetchRooms();
 
     } catch (error) {
@@ -141,87 +129,114 @@ const RoomManagement = () => {
     setConfirmOpen(false);
   };
 
+  // ================= RESET =================
+  const resetForm = () => {
+    setResourceName("");
+    setCapacity("");
+    setType("General");
+    setEditId(null);
+  };
 
-  // ---------- UI ----------
-
+  // ================= UI =================
   return (
     <MainLayout>
 
       <div style={tableContainer}>
 
-        <h2>Room Management</h2>
+        <h2>Available Resources</h2>
         <hr />
 
-        {/* ---------- TABLE ---------- */}
-
+        {/* ===== TABLE ===== */}
         <table style={tableStyle}>
-
           <thead>
             <tr>
-              <th style={thStyle}>Room</th>
+              <th style={thStyle}>Name</th>
+              <th style={thStyle}>Type</th>
               <th style={thStyle}>Capacity</th>
-              <th style={thStyle}>Occupied</th>
+              <th style={thStyle}>In Use</th>
               <th style={thStyle}>Status</th>
               <th style={thStyle}>Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {rooms
-              .filter(room => room.status === "active")
-              .map((room) => (
+            {rooms.map((room) => (
+              <tr key={room._id}>
 
-                <tr key={room._id}>
-                  <td style={tdStyle}>{room.roomNumber}</td>
-                  <td style={tdStyle}>{room.capacity}</td>
-                  <td style={tdStyle}>{room.occupiedCount}</td>
-                  <td style={tdStyle}>{room.status}</td>
+                <td style={tdStyle}>{room.resourceName}</td>
 
-                  <td style={tdStyle}>
-                    <button
-                      style={buttonPrimary}
-                      onClick={() => handleEdit(room)}
-                    >
-                      Edit
-                    </button>
+                <td style={tdStyle}>
+                  {room.type || "General"}
+                </td>
 
-                    <button
-                      style={buttonDanger}
-                      onClick={() =>
-                        openDeactivateDialog(room._id)
-                      }
-                    >
-                      Deactivate
-                    </button>
-                  </td>
-                </tr>
+                <td style={tdStyle}>{room.capacity}</td>
 
+                <td style={tdStyle}>{room.occupiedCount}</td>
+
+                <td style={tdStyle}>
+                  {room.status === "inactive" ? (
+                    <span style={{ color: "gray" }}>Inactive</span>
+                  ) : room.occupiedCount === room.capacity ? (
+                    <span style={{ color: "red" }}>Full</span>
+                  ) : (
+                    <span style={{ color: "green" }}>Available</span>
+                  )}
+                </td>
+
+                <td style={tdStyle}>
+                  <button
+                    style={buttonPrimary}
+                    onClick={() => handleEdit(room)}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    style={buttonDanger}
+                    onClick={() => openDeactivateDialog(room._id)}
+                  >
+                    Deactivate
+                  </button>
+                </td>
+
+              </tr>
             ))}
           </tbody>
-
         </table>
 
         <hr style={{ margin: "20px 0", opacity: 0.2 }} />
 
-        {/* ---------- FORM ---------- */}
+        {/* ===== FORM ===== */}
+        <h3>{editId ? "Update Resource" : "Add Resource"}</h3>
 
-        <h3>{editId ? "Update Room" : "Add Room"}</h3>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
 
-        <input
-          placeholder="Room Number"
-          value={roomNumber}
-          onChange={(e) => setRoomNumber(e.target.value)}
-        />
+          <input
+            placeholder="Resource Name"
+            value={resourceName}
+            onChange={(e) => setResourceName(e.target.value)}
+          />
 
-        <br /><br />
+          <input
+            type="number"
+            placeholder="Capacity"
+            value={capacity}
+            onChange={(e) => setCapacity(Number(e.target.value))}
+          />
 
-        <input
-          placeholder="Capacity"
-          value={capacity}
-          onChange={(e) => setCapacity(Number(e.target.value))}
-        />
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option>Electronics</option>
+            <option>Lab</option>
+            <option>Hall</option>
+            <option>General</option>
+          </select>
 
-        <br /><br />
+        </div>
+
+        <br />
 
         {editId ? (
           <button
@@ -229,26 +244,25 @@ const RoomManagement = () => {
             onClick={handleUpdate}
             disabled={loading}
           >
-            Update Room
+            Update Resource
           </button>
         ) : (
           <button
             style={buttonPrimary}
-            onClick={handleAddRoom}
+            onClick={handleAdd}
             disabled={loading}
           >
-            Add Room
+            Add Resource
           </button>
         )}
 
       </div>
 
-      {/* ---------- CONFIRM MODAL ---------- */}
-
+      {/* ===== CONFIRM MODAL ===== */}
       <ConfirmDialog
         open={confirmOpen}
-        title="Deactivate Room"
-        message="Are you sure you want to deactivate this room?"
+        title="Deactivate Resource"
+        message="Are you sure you want to deactivate this resource?"
         onConfirm={confirmDeactivate}
         onCancel={() => setConfirmOpen(false)}
       />
@@ -257,4 +271,4 @@ const RoomManagement = () => {
   );
 };
 
-export default RoomManagement;
+export default ResourceManagement;

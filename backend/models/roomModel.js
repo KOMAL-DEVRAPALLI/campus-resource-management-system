@@ -19,6 +19,10 @@ const roomSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "active",
   },
+  type:{
+    type: String,
+    default:"General"
+  }
 }, { timestamps: true });
 
 export default mongoose.model("Room", roomSchema);
