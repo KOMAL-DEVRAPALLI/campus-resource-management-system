@@ -190,42 +190,43 @@ const FeeDashboard = () => {
   };
   /* ===== BULK BILL ===== */
 
-  const handleBulkGenerate = async () => {
-    if (!bulkMonth || !bulkAmount) {
-      toast.error("Month and amount required");
-      return;
-    }
+ const handleBulkGenerate = async () => {
+  const cleanMonth = bulkMonth.trim().toLowerCase();
 
-    try {
-      setLoading(true);
+  console.log("DEBUG:", {
+    month: cleanMonth,
+    amount: bulkAmount
+  });
 
-      await apiRequest(API.FEES.BULK_GENERATE, "POST", {
-        month: month.trim().toLowerCase(),
-        amount: Number(bulkAmount),// ✅ FIXED,
-        bookingDate,
-        timeSlot
-      });
+  if (!cleanMonth || !bulkAmount || Number(bulkAmount) <= 0) {
+    toast.error("Valid month and amount required");
+    return;
+  }
 
-      toast.success("Bulk booking generated");
+  try {
+    setLoading(true);
 
-      setBulkMonth("");
-      setBulkAmount("");
+    await apiRequest(API.FEES.BULK_GENERATE, "POST", {
+      month: cleanMonth,
+      amount: Number(bulkAmount),
+      bookingDate,
+      timeSlot
+    });
 
-      fetchFees()
+    toast.success("Bulk booking generated");
 
-    } catch (error) {
-      console.error(error);
+    setBulkMonth("");
+    setBulkAmount("");
 
-      const msg =
-        error?.message ||
-        error?.response?.data?.message ||
-        "Something went wrong";
+    fetchFees();
 
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
   /* ===== SINGLE BILL ===== */
 
   const handleAddBill = async () => {
