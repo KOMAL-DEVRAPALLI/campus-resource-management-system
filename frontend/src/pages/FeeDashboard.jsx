@@ -135,7 +135,7 @@ const filteredFees =
   filter === "all"
     ? fees
     : fees.filter((f) => f.status?.toLowerCase() === filter);
- const studentFees = fees.filter(f => f.studentId);
+    const studentFees = fees.filter(f => f?.studentId); 
 
  const groupedFees = filteredFees.reduce((acc, fee) => {
   const isObject = typeof fee.studentId === "object";
@@ -351,7 +351,7 @@ const handleStatusToggle = async (fee) => {
   onChange={(e) => setTimeSlot(e.target.value)}
 />
               <button style={btn} onClick={handleAddBill}>
-                Generate Bill
+                  Generate Booking
               </button>
             </div>
 
@@ -461,7 +461,7 @@ overflowY: "auto",
      {role !== "admin" && (
   <div style={studentCard}>
 
-    <h3>Your Fee History</h3>
+    <h3>Your Booking History</h3>
 
     {studentFees.length === 0 ? (
       <p>No bookings found</p>

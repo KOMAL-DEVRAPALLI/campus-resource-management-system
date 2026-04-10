@@ -34,20 +34,20 @@ export const apiGet = async (url) => {
   return handleResponse(res);
 };
 
-export const apiRequest = async (url, method, body) => {
-  const token = localStorage.getItem("token");
-
-  const fullUrl = BASE_URL + url;
-  // console.log("REQUEST:", fullUrl);
-
-  const res = await fetch(fullUrl, {
+export const apiRequest = async (url, method, data) => {
+  const res = await fetch(`${BASE_URL}${url}`, {
     method,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(body),
+    body: data ? JSON.stringify(data) : null, // 🔥 MUST
   });
 
-  return handleResponse(res);
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Request failed");
+  }
+
+  return result;
 };
