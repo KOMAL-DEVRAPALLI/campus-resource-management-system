@@ -10,7 +10,7 @@ import {
   buttonPrimary,
   tableContainer
 } from "../styles/uiStyles";
-
+import "../styles/animations.css";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 
@@ -35,6 +35,7 @@ const ResourceManagement = () => {
       setRooms(data);
     } catch (error) {
       toast.error("Failed to fetch resources");
+      new Audio("/error.mp3").play();
     }
   };
 
@@ -46,11 +47,13 @@ const ResourceManagement = () => {
   const handleAdd = async () => {
     if (!resourceName || !capacity) {
       toast.error("All fields required");
+      new Audio("/error.mp3").play();
       return;
     }
 
     if (Number(capacity) <= 0) {
       toast.error("Capacity must be greater than 0");
+      new Audio("/error.mp3").play();
       return;
     }
 
@@ -64,17 +67,19 @@ const ResourceManagement = () => {
       });
 
       toast.success("Resource added");
-         console.log("Data:",{
-          resourceName,
-          capacity,
-          type
-         });
-         
+      new Audio("/success.mp3").play();
+      console.log("Data:", {
+        resourceName,
+        capacity,
+        type
+      });
+
       resetForm();
       fetchRooms();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -100,12 +105,13 @@ const ResourceManagement = () => {
       });
 
       toast.success("Resource updated");
-
+new Audio("/success.mp3").play();
       resetForm();
       fetchRooms();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -125,10 +131,12 @@ const ResourceManagement = () => {
       );
 
       toast.success("Resource deactivated");
+      new Audio("/success.mp3").play();
       fetchRooms();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     }
 
     setConfirmOpen(false);
@@ -184,7 +192,14 @@ const ResourceManagement = () => {
                   ) : room.occupiedCount === room.capacity ? (
                     <span style={{ color: "red" }}>Full</span>
                   ) : (
-                    <span style={{ color: "green" }}>Available</span>
+                    <span style={{
+                      padding: "4px 10px",
+                      borderRadius: "20px",
+                      background: "#22c55e",
+                      color: "white",
+                      transition: "0.3s",
+                      transform:"scale(1.05)"
+                    }}>Available</span>
                   )}
                 </td>
 

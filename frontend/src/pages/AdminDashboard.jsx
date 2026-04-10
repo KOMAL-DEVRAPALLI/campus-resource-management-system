@@ -69,6 +69,7 @@ setChartData(dashboard)
     } catch (error) {
       console.error(error); // ✅ DON'T HIDE ERRORS
       toast.error("Error loading dashboard");
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -113,10 +114,12 @@ setChartData(dashboard)
       const res = await apiRequest(API.STUDENTS.AUTO_ALLOCATE, "POST");
 
       toast.success(res.message || "Auto allocation completed");
+      new Audio("/success.mp3").play();
       loadStats();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setLoadingAction(false);
       setConfirmOpen(false);
@@ -135,10 +138,12 @@ setChartData(dashboard)
       });
 
       toast.success("Fee generated");
+      new Audio("/success.mp3").play();
       loadStats();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     }
   };
 
@@ -248,7 +253,14 @@ setChartData(dashboard)
 /* ===== COMPONENT ===== */
 
 const StatCard = ({ title, value, gradient, icon }) => (
-  <div style={{ ...cardStyle, background: gradient }}>
+  <div style={{ ...cardStyle, background: gradient }}onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+  }}>
     <div style={iconWrapper}>{icon}</div>
     <h3 style={cardTitle}>{title}</h3>
     <p style={numberStyle}>{value}</p>
@@ -295,7 +307,10 @@ const cardStyle = {
   padding: "25px",
   borderRadius: "12px",
   color: "white",
-  textAlign: "center"
+  textAlign: "center",
+  transition:"all 0.3s ease",
+  overflow:"hidden",
+  boxShadow:"0 2px 10px rgba(0,0,0,0.05)"
 };
 
 const iconWrapper = {

@@ -35,21 +35,25 @@ const AddStudentPage = () => {
 
     if (!name || !phone || !email || !password) {
       toast.error("All fields are required");
+       new Audio("/error.mp3").play();
       return false;
     }
 
     if (!/^\d{10}$/.test(phone)) {
       toast.error("Phone must be 10 digits");
+       new Audio("/error.mp3").play();
       return false;
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Invalid email format");
+       new Audio("/error.mp3").play();
       return false;
     }
 
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
+       new Audio("/error.mp3").play();
       return false;
     }
 
@@ -68,6 +72,7 @@ const AddStudentPage = () => {
       await apiRequest(API.STUDENTS.ALL, "POST", formData);
 
       toast.success("User added successfully");
+      new Audio("/success.mp3").play();
       setFormData({
   name: "",
   phone: "",
@@ -79,6 +84,7 @@ const AddStudentPage = () => {
     } catch (error) {
       console.error(error); // ✅ DON'T HIDE ERRORS
       toast.error(error.message || "Something went wrong");
+       new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }

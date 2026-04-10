@@ -194,7 +194,8 @@ const menuItem = {
   borderRadius: "8px",
   color: "white",
   textDecoration: "none",
-  transition: "0.2s"
+  transition: "all 0.3s ease",
+  overflow: "hidden",
 };
 const badgeStyle = {
   position: "absolute",
@@ -204,7 +205,8 @@ const badgeStyle = {
   color: "white",
   borderRadius: "50%",
   fontSize: "10px",
-  padding: "3px 6px"
+  padding: "3px 6px",
+  transition: "all 0.3s ease",
 };
 
 const dropdownStyle = {

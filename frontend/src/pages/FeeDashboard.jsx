@@ -38,6 +38,7 @@ const FeeDashboard = () => {
 
     socket.on("paymentSuccess", async (data) => {
       toast.success(data.message);
+      new Audio("/success.mp3").play();
       await fetchFees();
     });
 
@@ -63,6 +64,7 @@ const FeeDashboard = () => {
 
     } catch {
       toast.error("Failed to fetch bills");
+      new Audio("/error.mp3").play();
     }
   };
 
@@ -72,6 +74,7 @@ const FeeDashboard = () => {
       setStudents(data);
     } catch {
       toast.error("Failed to fetch users");
+      new Audio("/error.mp3").play();
     }
   };
 
@@ -113,12 +116,14 @@ const FeeDashboard = () => {
       };
       if (!window.Razorpay) {
         toast.error("Booking system not loaded");
+        new Audio("/error.mp3").play();
         setLoadingId(null); // 🔥 missing
         return;
       }
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", () => {
         toast.error("Booking failed");
+        new Audio("/error.mp3").play();
         setLoadingId(null);
       });
 
@@ -127,6 +132,7 @@ const FeeDashboard = () => {
     } catch (err) {
       console.error(err);
       toast.error("Booking failed. Try again");
+      new Audio("/error.mp3").play();
       setLoadingId(null); // 🔥 important
     }
   };
@@ -179,11 +185,12 @@ const FeeDashboard = () => {
       });
 
       toast.success(`Marked as ${newStatus}`);
-
+new Audio("/success.mp3").play();
       await fetchFees(); // refresh UI
     } catch (err) {
       console.error(err);
       toast.error("Failed to update status");
+      new Audio("/error.mp3").play();
     } finally {
       setLoadingId(null);
     }
@@ -200,6 +207,7 @@ const FeeDashboard = () => {
 
   if (!cleanMonth || !bulkAmount || Number(bulkAmount) <= 0) {
     toast.error("Valid month and amount required");
+    new Audio("/error.mp3").play();
     return;
   }
 
@@ -214,7 +222,7 @@ const FeeDashboard = () => {
     });
 
     toast.success("Bulk booking generated");
-
+new Audio("/success.mp3").play();
     setBulkMonth("");
     setBulkAmount("");
 
@@ -222,7 +230,7 @@ const FeeDashboard = () => {
 
   } catch (error) {
     console.error(error);
-    toast.error(error.message || "Something went wrong");
+    (error.message || "Something went wrong");
   } finally {
     setLoading(false);
   }
@@ -234,11 +242,13 @@ const FeeDashboard = () => {
 
   if (!userId || !cleanMonth || !amount) {
     toast.error("All fields required");
+    new Audio("/error.mp3").play();
     return;
   }
 
   if (Number(amount) <= 0) {
     toast.error("Amount must be greater than 0");
+    new Audio("/error.mp3").play();
     return;
   }
 
@@ -258,7 +268,7 @@ const FeeDashboard = () => {
   amount
 });
     toast.success("Booking generated");
-
+new Audio("/success.mp3").play();
     setUserId("");
     setMonth("");
     setAmount("");
@@ -273,6 +283,7 @@ const FeeDashboard = () => {
       "Something went wrong";
 
     toast.error(msg);
+    new Audio("/error.mp3").play();
   } finally {
     setLoading(false);
   }
@@ -395,7 +406,7 @@ const FeeDashboard = () => {
                     style={{
                       ...studentCard,
                       background: isOpen ? "#f1f5f9" : "#fff",
-                      transition: "0.3s"
+                      transition: "all 0.3s ease",overflow: "hidden"
                     }}
                   >
 
@@ -408,7 +419,8 @@ const FeeDashboard = () => {
 
                       <span
                         style={{
-                          transition: "0.3s",
+                          transition: "all 0.3s ease",
+                          overflow: "hidden",
                           transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
                         }}
                       >
@@ -421,7 +433,8 @@ const FeeDashboard = () => {
                       style={{
                         maxHeight: isOpen ? "500px" : "0px",
                         overflowY: "auto",
-                        transition: "all 0.3s ease"
+                        transition: "all 0.3s ease",
+                        overflowX: "hidden"
                       }}
                     >
 
@@ -521,7 +534,8 @@ const clickableHeader = {
   cursor: "pointer",
   alignItems: "center",
   padding: "10px 0",
-  transition: "0.2s"
+  transition: "all 0.2s ease ",
+  overflow: "hidden"
 };
 const feeRow = {
   display: "grid",
@@ -530,9 +544,10 @@ const feeRow = {
   padding: "12px 10px",
   borderBottom: "1px solid #eee",
   gap: "10px",
-  transition: "0.2s"
+  transition: "all 0.2s ease ",
+  overflow: "hidden"
 };
-const wrapper = { maxWidth: "1200px", margin: "0 auto" };
+const wrapper = { maxWidth: "1200px", margin: "0 auto",animation:"fadeIn 0.5s ease" };
 const forms = { display: "flex", gap: 20, flexWrap: "wrap" };
 
 const box = {

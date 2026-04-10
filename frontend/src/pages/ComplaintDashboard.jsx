@@ -31,6 +31,7 @@ const ComplaintDashboard = () => {
     } catch (error) {
       console.error("Fetch complaints error:", error);
       toast.error(error.message || "Failed to load complaints");
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -52,11 +53,13 @@ const ComplaintDashboard = () => {
 
     if (!form.title.trim() || !form.description.trim()) {
       toast.error("All fields required");
+      new Audio("/error.mp3").play();
       return;
     }
 
     if (form.description.length < 10) {
       toast.error("Description too short");
+      new Audio("/error.mp3").play();
       return;
     }
 
@@ -73,12 +76,14 @@ const ComplaintDashboard = () => {
       setComplaints(prev => [newComplaint, ...prev]);
 
       toast.success("Complaint submitted");
+      new Audio("/success.mp3").play();
       fetchComplaints();
       setForm({ title: "", description: "" });
 
     } catch (error) {
       console.error("Create complaint error:", error);
       toast.error(error.message || "Failed to submit complaint");
+      new Audio("/error.mp3").play();
     } finally {
       setSubmitting(false);
     }
@@ -101,10 +106,12 @@ const ComplaintDashboard = () => {
     );
 
     toast.success("Complaint resolved");
+    new Audio("/success.mp3").play();
 
   } catch (error) {
     console.error(error);
     toast.error(error.message);
+    new Audio("/error.mp3").play();
   }
 };
 

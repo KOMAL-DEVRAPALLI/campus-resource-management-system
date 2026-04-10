@@ -57,6 +57,7 @@ const StudentListPage = () => {
     } catch (error) {
       console.error(error);
       toast.error("Failed to load data");
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -88,9 +89,11 @@ const StudentListPage = () => {
       );
 
       toast.success("User deactivated");
+      new Audio("/success.mp3").play();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setConfirmOpen(false);
     }
@@ -102,6 +105,7 @@ const StudentListPage = () => {
 
     if (!selectedStudentId || !selectedresourceId) {
       toast.error("Select user and resources");
+      new Audio("/error.mp3").play();
       return;
     }
 
@@ -118,6 +122,7 @@ const StudentListPage = () => {
       );
 
       toast.success("Room allocated");
+      new Audio("/success.mp3").play();
 
       loadData();
 
@@ -126,6 +131,7 @@ const StudentListPage = () => {
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setActionLoading(false);
     }
@@ -144,11 +150,12 @@ const StudentListPage = () => {
       );
 
       toast.success("Auto allocated");
-
+new Audio("/success.mp3").play();
       loadData();
 
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setActionLoading(false);
     }
@@ -173,9 +180,10 @@ const StudentListPage = () => {
       );
 
       toast.success("Room removed");
-
+new Audio("/success.mp3").play();
     } catch (error) {
       toast.error(error.message);
+      new Audio("/error.mp3").play();
     } finally {
       setActionLoading(false);
     }

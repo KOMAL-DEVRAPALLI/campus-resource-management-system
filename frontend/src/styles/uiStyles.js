@@ -15,6 +15,7 @@ export const tableContainer = {
 
 export const rowHover ={
   transition: "background 0.2s ease",
+  overflow: "hidden",
   cursor:"pointer"
 }
 export const tableStyle = {
@@ -55,7 +56,9 @@ export const buttonPrimary = {
   borderRadius: "6px",
   cursor: "pointer",
   marginRight: "6px",
-  fontWeight:"500"
+  fontWeight:"500",
+   transition: "all 0.2s ease ",
+  overflow: "hidden"
 };
 
 export const buttonDanger = {

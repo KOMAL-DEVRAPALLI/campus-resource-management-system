@@ -55,6 +55,7 @@ const StudentDashboard = () => {
           });
 
           toast.success("Payment successful 🎉");
+          new Audio("/success.mp3").play();
           loadData();
         },
       };
@@ -65,6 +66,7 @@ const StudentDashboard = () => {
     } catch (err) {
       console.error(err);
       toast.error("Payment failed ❌");
+      new Audio("/error.mp3").play();
     } finally {
       setPaying(false);
     }
@@ -103,6 +105,7 @@ const StudentDashboard = () => {
     } catch (error) {
       console.error(error);
       toast.error("Failed to load dashboard");
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -215,7 +218,14 @@ const StudentDashboard = () => {
 /* ===== COMPONENT ===== */
 
 const Card = ({ title, value, color, icon }) => (
-  <div style={{ ...cardStyle, background: color }}>
+  <div style={{ ...cardStyle, background: color }}onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+  }}>
     {icon}
     <h3>{title}</h3>
     <p style={numberStyle}>{value}</p>

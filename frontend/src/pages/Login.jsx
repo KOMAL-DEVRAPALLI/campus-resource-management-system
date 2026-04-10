@@ -61,12 +61,13 @@ const LoginPage = () => {
       localStorage.setItem("role", decoded.role);
 
       toast.success("Login successful");
-
+new Audio("/success.mp3").play();
       navigate(decoded.role === "admin" ? "/admin" : "/student");
 
     } catch (err) {
       console.error(err); // ✅ ALWAYS LOG
       toast.error(err.message || "Login failed");
+      new Audio("/error.mp3").play();
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,14 @@ const LoginPage = () => {
   return (
     <div style={pageStyle}>
 
-      <div style={cardStyle}>
+      <div style={cardStyle}onMouseEnter={(e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.1)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+  }}>
 
         <h2 style={titleStyle}>Resource Management System</h2>
         <p style={subtitleStyle}>Login to continue</p>
