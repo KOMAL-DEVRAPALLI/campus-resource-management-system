@@ -81,7 +81,7 @@ setChartData(dashboard)
 
     const overdue = fees.filter(f => f.status === "overdue");
     if (overdue.length > 0) {
-      list.push(`⚠️ ${overdue.length} overdue fees`);
+      list.push(`⚠️ ${overdue.length} overdue bookings`);
     }
 
     const highOccupancy = rooms.filter(
@@ -89,12 +89,12 @@ setChartData(dashboard)
     );
 
     if (highOccupancy.length > 0) {
-      list.push(`⚠️ ${highOccupancy.length} rooms near full capacity`);
+      list.push(`⚠️ ${highOccupancy.length} resources near full capacity`);
     }
 
     const open = complaints.filter(c => c.status === "open");
     if (open.length > 5) {
-      list.push(`🚨 High complaint load (${open.length})`);
+      list.push(`🚨 High issues load (${open.length})`);
     }
 
     if (list.length === 0) {
@@ -165,7 +165,7 @@ setChartData(dashboard)
 
             {chartData && (
   <div style={{ marginTop: "30px", background: "#fff", padding: "20px", borderRadius: "10px" }}>
-    <h3>Monthly Fee Collection</h3>
+    <h3>Monthly Bookings Collection</h3>
 
     <ResponsiveContainer width="100%" height={300}>
   <LineChart data={chartData.monthlyFees}>
@@ -179,7 +179,7 @@ setChartData(dashboard)
 )}
 {chartData && (
   <div style={{ marginTop: "30px", background: "#fff", padding: "20px", borderRadius: "10px" }}>
-    <h3>Fee Status</h3>
+    <h3>Booking Status</h3>
 
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -227,7 +227,7 @@ setChartData(dashboard)
                 style={actionBtn}
                 onClick={handleGenerateAllFees}
               >
-                Generate Monthly Fees
+                Generate Monthly Bookings
               </button>
             </div>
           </div>

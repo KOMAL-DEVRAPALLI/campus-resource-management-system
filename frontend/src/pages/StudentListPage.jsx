@@ -308,7 +308,7 @@ const StudentListPage = () => {
                 onChange={(e) => setSelectedresourceId(e.target.value)}
                 style={inputStyle}
               >
-                <option value="">Select Room</option>
+                <option value="">Select Resource</option>
                 {rooms
                   .filter(r => r.status === "active" && r.occupiedCount < r.capacity)
                   .map(r => (
