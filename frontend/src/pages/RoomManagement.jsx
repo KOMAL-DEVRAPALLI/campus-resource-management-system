@@ -49,7 +49,7 @@ const ResourceManagement = () => {
       return;
     }
 
-    if (capacity <= 0) {
+    if (Number(capacity) <= 0) {
       toast.error("Capacity must be greater than 0");
       return;
     }
@@ -59,12 +59,17 @@ const ResourceManagement = () => {
 
       await apiRequest(API.ROOMS.ALL, "POST", {
         resourceName,
-        capacity,
+        capacity: Number(capacity),
         type
       });
 
       toast.success("Resource added");
-
+         console.log("Data:",{
+          resourceName,
+          capacity,
+          type
+         });
+         
       resetForm();
       fetchRooms();
 
@@ -221,7 +226,7 @@ const ResourceManagement = () => {
             type="number"
             placeholder="Capacity"
             value={capacity}
-            onChange={(e) => setCapacity(Number(e.target.value))}
+            onChange={(e) => setCapacity(e.target.value)}
           />
 
           <select
