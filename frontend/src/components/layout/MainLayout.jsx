@@ -101,7 +101,7 @@ useEffect(() => {
               background: isActive ? "#2563eb" : "#1e293b"
             })}
           >
-            <FaMoneyBill /> {role === "admin" ? "Issues" : "My Issues"}
+            <FaMoneyBill /> {role === "admin" ? "Bookings" : "My Bookings"}
           </NavLink>
 
           <NavLink
@@ -112,7 +112,7 @@ useEffect(() => {
             })}
           >
             <FaExclamationCircle />{" "}
-            {role === "admin" ? "Complaints" : "My Complaints"}
+            {role === "admin" ? "Issues" : "My Issues"}
           </NavLink>
         </div>
 
