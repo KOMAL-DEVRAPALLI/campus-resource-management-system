@@ -119,18 +119,18 @@ const StudentDashboard = () => {
         <>
           {/* ===== CARDS ===== */}
           <div style={cardContainer}>
-            <Card title="Room" value={roomNumber} color="#3b82f6" icon={<FaBed />} />
-            <Card title="Pending Fees" value={pendingFees} color="#f59e0b" icon={<FaMoneyBillWave />} />
-            <Card title="Open Complaints" value={openComplaints} color="#ef4444" icon={<FaExclamationCircle />} />
+            <Card title="Resource" value={roomNumber} color="#3b82f6" icon={<FaBed />} />
+            <Card title="Pending Bookings" value={pendingFees} color="#f59e0b" icon={<FaMoneyBillWave />} />
+            <Card title="Open Issues" value={openComplaints} color="#ef4444" icon={<FaExclamationCircle />} />
           </div>
 
           {/* ===== FEES ===== */}
           <div style={feeContainer}>
-            <h3>My Fees</h3>
+            <h3>My Bookings</h3>
 
             {actionableFees.length === 0 ? (
               <div style={emptyState}>
-                <h4>No Pending Fees 🎉</h4>
+                <h4>No Pending Bookings 🎉</h4>
                 <p>You are all clear!</p>
               </div>
             ) : (
