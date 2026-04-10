@@ -3,12 +3,10 @@ import Room from "../models/roomModel.js";
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 
-
-// ================= ADD STUDENT =================
+/* ================= ADD STUDENT ================= */
 
 export const addStudent = async (req, res) => {
   try {
-
     const { name, phone, email, password } = req.body;
 
     if (!name || !phone || !email || !password) {
@@ -48,47 +46,39 @@ export const addStudent = async (req, res) => {
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error adding student",
+      message: error.message,
     });
-
   }
 };
 
 
-
-// ================= GET ALL =================
+/* ================= GET ALL ================= */
 
 export const getAllStudents = async (req, res) => {
   try {
-
     const students = await Student.find({
       status: "active",
-    }).populate("resourceId");
+    }).populate("resourceId", "resourceName"); // ✅ clean populate
 
     res.status(200).json(students);
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error fetching students",
+      message: error.message,
     });
-
   }
 };
 
 
-
-// ================= GET MY =================
+/* ================= GET MY ================= */
 
 export const getMyStudent = async (req, res) => {
   try {
-
     const student = await Student.findOne({
       userId: req.user.id,
       status: "active",
-    }).populate("resourceId");
+    }).populate("resourceId", "resourceName");
 
     if (!student) {
       return res.status(404).json({
@@ -99,21 +89,17 @@ export const getMyStudent = async (req, res) => {
     res.status(200).json(student);
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error fetching student",
+      message: error.message,
     });
-
   }
 };
 
 
-
-// ================= UPDATE =================
+/* ================= UPDATE ================= */
 
 export const updateStudent = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const student = await Student.findByIdAndUpdate(
@@ -134,21 +120,17 @@ export const updateStudent = async (req, res) => {
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error updating student",
+      message: error.message,
     });
-
   }
 };
 
 
-
-// ================= DEACTIVATE =================
+/* ================= DEACTIVATE ================= */
 
 export const deactivateStudent = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const student = await Student.findById(id);
@@ -160,14 +142,12 @@ export const deactivateStudent = async (req, res) => {
     }
 
     if (student.resourceId) {
+      const resource = await Room.findById(student.resourceId);
 
-      const room = await Room.findById(student.resourceId);
-
-      if (room && room.occupiedCount > 0) {
-        room.occupiedCount -= 1;
-        await room.save();
+      if (resource && resource.occupiedCount > 0) {
+        resource.occupiedCount -= 1;
+        await resource.save();
       }
-
     }
 
     student.status = "inactive";
@@ -180,154 +160,148 @@ export const deactivateStudent = async (req, res) => {
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error deactivating student",
+      message: error.message,
     });
-
   }
 };
 
 
+/* ================= AUTO ALLOCATE ALL ================= */
+
 export const autoAllocateAll = async (req, res) => {
   try {
-
     if (req.user.role !== "admin") {
       return res.status(403).json({
-        message: "Not authorized"
+        message: "Not authorized",
       });
     }
 
     const students = await Student.find({
       status: "active",
-      resourceId: null
+      resourceId: null,
     });
 
-    const rooms = await Room.find({
-      status: "active"
+    const resources = await Room.find({
+      status: "active",
     }).sort({ occupiedCount: 1 });
 
     let allocatedCount = 0;
 
     for (let student of students) {
-
-      const room = rooms.find(
+      const resource = resources.find(
         r => r.occupiedCount < r.capacity
       );
 
-      if (!room) break;
+      if (!resource) break;
 
-      student.resourceId = room._id;
+      student.resourceId = resource._id;
       await student.save();
 
-      room.occupiedCount += 1;
-      await room.save();
+      resource.occupiedCount += 1;
+      await resource.save();
 
       allocatedCount++;
     }
 
     res.status(200).json({
-      message: `${allocatedCount} students auto allocated`
+      message: `${allocatedCount} students auto allocated`,
     });
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
-// ================= ALLOCATE =================
+
+
+/* ================= AUTO ALLOCATE ONE ================= */
 
 export const autoAllocateRoom = async (req, res) => {
   try {
-
     const { studentId } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
-        message: "Not authorized"
+        message: "Not authorized",
       });
     }
 
-    // find student
     const student = await Student.findById(studentId);
 
     if (!student || student.status !== "active") {
       return res.status(404).json({
-        message: "Student not found or inactive"
+        message: "Student not found or inactive",
       });
     }
 
     if (student.resourceId) {
       return res.status(400).json({
-        message: "Student already has room"
+        message: "Student already has a resource",
       });
     }
 
-    // find best room (least occupied but not full)
-    const room = await Room.findOne({
+    const resource = await Room.findOne({
       status: "active",
-      $expr: { $lt: ["$occupiedCount", "$capacity"] }
+      $expr: { $lt: ["$occupiedCount", "$capacity"] },
     }).sort({ occupiedCount: 1 });
 
-    if (!room) {
+    if (!resource) {
       return res.status(400).json({
-        message: "No available rooms"
+        message: "No available resources",
       });
     }
 
-    // assign room
-    student.resourceId = room._id;
+    student.resourceId = resource._id;
     await student.save();
 
-    room.occupiedCount += 1;
-    await room.save();
+    resource.occupiedCount += 1;
+    await resource.save();
 
     res.status(200).json({
-      message: `Room ${room.roomNumber} auto allocated`
+      message: `Resource ${resource.resourceName} auto allocated`,
     });
 
   } catch (error) {
     res.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 };
 
-// ================= DEALLOCATE =================
+
+/* ================= DEALLOCATE ================= */
 
 export const deallocateRoom = async (req, res) => {
   try {
-
     const { studentId } = req.body;
 
     const student = await Student.findById(studentId);
 
     if (!student || !student.resourceId) {
       return res.status(400).json({
-        message: "Student has no room",
+        message: "Student has no resource",
       });
     }
 
-    const room = await Room.findById(student.resourceId);
+    const resource = await Room.findById(student.resourceId);
 
-    if (room && room.occupiedCount > 0) {
-      room.occupiedCount -= 1;
-      await room.save();
+    if (resource && resource.occupiedCount > 0) {
+      resource.occupiedCount -= 1;
+      await resource.save();
     }
 
     student.resourceId = null;
     await student.save();
 
     res.status(200).json({
-      message: "Room removed",
+      message: "Resource removed",
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message: "Error removing room",
+      message: error.message,
     });
-
   }
 };
