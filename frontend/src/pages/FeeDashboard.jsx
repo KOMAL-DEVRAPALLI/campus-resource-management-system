@@ -16,7 +16,7 @@ const FeeDashboard = () => {
   const [loading, setLoading] = useState(true);
   const role = localStorage.getItem("role");
   const [expandedStudent, setExpandedStudent] = useState(null);
-    const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState("");
   const [month, setMonth] = useState("");
   const [amount, setAmount] = useState("");
   const [bulkMonth, setBulkMonth] = useState("");
@@ -27,40 +27,40 @@ const FeeDashboard = () => {
   // console.log("ROLE:", role);
 
   // ================= SOCKET =================
- useEffect(() => {
-  const socket = io("https://campusbackend-p1f4.onrender.com", {
-    transports: ["websocket"],
-  });
+  useEffect(() => {
+    const socket = io("https://campusbackend-p1f4.onrender.com", {
+      transports: ["websocket"],
+    });
 
-  socket.on("connect", () => {
-    console.log("✅ CONNECTED:", socket.id);
-  });
+    socket.on("connect", () => {
+      console.log("✅ CONNECTED:", socket.id);
+    });
 
-  socket.on("paymentSuccess", async (data) => {
-    toast.success(data.message);
-    await fetchFees();
-  });
+    socket.on("paymentSuccess", async (data) => {
+      toast.success(data.message);
+      await fetchFees();
+    });
 
-  return () => {
-    socket.off("paymentSuccess");
-    socket.disconnect();
+    return () => {
+      socket.off("paymentSuccess");
+      socket.disconnect();
+    };
+  }, []);
+  const toggleStudent = (studentId) => {
+    setExpandedStudent((prev) =>
+      prev === studentId ? null : studentId
+    );
   };
-}, []);
-const toggleStudent = (studentId) => {
-  setExpandedStudent((prev) =>
-    prev === studentId ? null : studentId
-  );
-};
   // ================= FETCH =================
   const fetchFees = async () => {
     try {
       const data = await apiGet(API.FEES.ALL);
       // console.log("📦 FEES DATA:", data);
-        if (!Array.isArray(data)) {
-  throw new Error("Invalid data");
-}
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data");
+      }
       setFees(data);
-    
+
     } catch {
       toast.error("Failed to fetch bills");
     }
@@ -111,83 +111,83 @@ const toggleStudent = (studentId) => {
           setLoadingId(null);
         },
       };
- if (!window.Razorpay) {
-  toast.error("Booking system not loaded");
-  setLoadingId(null); // 🔥 missing
-  return;
-}
+      if (!window.Razorpay) {
+        toast.error("Booking system not loaded");
+        setLoadingId(null); // 🔥 missing
+        return;
+      }
       const rzp = new window.Razorpay(options);
-    rzp.on("payment.failed", () => {
-  toast.error("Booking failed");
-  setLoadingId(null);
-});
+      rzp.on("payment.failed", () => {
+        toast.error("Booking failed");
+        setLoadingId(null);
+      });
 
       rzp.open();
 
     } catch (err) {
-  console.error(err);
-  toast.error("Booking failed. Try again");
-  setLoadingId(null); // 🔥 important
-}
+      console.error(err);
+      toast.error("Booking failed. Try again");
+      setLoadingId(null); // 🔥 important
+    }
   };
-    // ================= FILTER =================
-const filteredFees =
-  filter === "all"
-    ? fees
-    : fees.filter((f) => f.status?.toLowerCase() === filter);
-    const studentFees = fees.filter(f => f?.studentId); 
+  // ================= FILTER =================
+  const filteredFees =
+    filter === "all"
+      ? fees
+      : fees.filter((f) => f.status?.toLowerCase() === filter);
+  const studentFees = fees.filter(f => f?.studentId);
 
- const groupedFees = filteredFees.reduce((acc, fee) => {
-  const isObject = typeof fee.studentId === "object";
+  const groupedFees = filteredFees.reduce((acc, fee) => {
+    const isObject = typeof fee.studentId === "object";
 
-  const studentId = isObject
-    ? fee.studentId._id
-    : fee.studentId || "unknown";
+    const studentId = isObject
+      ? fee.studentId._id
+      : fee.studentId || "unknown";
 
-  const studentName = isObject
-    ? fee.studentId.name
-    : "Unknown";
+    const studentName = isObject
+      ? fee.studentId.name
+      : "Unknown";
 
-  if (!acc[studentId]) {
-    acc[studentId] = {
-      name: studentName,
-      fees: []
-    };
-  }
+    if (!acc[studentId]) {
+      acc[studentId] = {
+        name: studentName,
+        fees: []
+      };
+    }
 
-  acc[studentId].fees.push(fee);
+    acc[studentId].fees.push(fee);
 
-  return acc;
-}, {});
+    return acc;
+  }, {});
 
- /* ===== STATS ===== */
-   const total = fees.length;
-const paid = fees.filter(b => b.status?.toLowerCase() === "paid").length;
-const unpaid = fees.filter(b => b.status?.toLowerCase() === "unpaid").length;
-const overdue = fees.filter(b => b.status?.toLowerCase() === "overdue").length;
+  /* ===== STATS ===== */
+  const total = fees.length;
+  const paid = fees.filter(b => b.status?.toLowerCase() === "paid").length;
+  const unpaid = fees.filter(b => b.status?.toLowerCase() === "unpaid").length;
+  const overdue = fees.filter(b => b.status?.toLowerCase() === "overdue").length;
 
-const handleStatusToggle = async (fee) => {
-  try {
-    setLoadingId(fee._id);
+  const handleStatusToggle = async (fee) => {
+    try {
+      setLoadingId(fee._id);
 
-    const newStatus =
-      fee.status?.toLowerCase() === "paid" ? "unpaid" : "paid";
+      const newStatus =
+        fee.status?.toLowerCase() === "paid" ? "unpaid" : "paid";
 
-    await apiRequest(API.FEES.UPDATE_STATUS(fee._id), "PATCH", {
-      feeId: fee._id,
-      status: newStatus,
-    });
+      await apiRequest(API.FEES.UPDATE_STATUS(fee._id), "PATCH", {
+        feeId: fee._id,
+        status: newStatus,
+      });
 
-    toast.success(`Marked as ${newStatus}`);
+      toast.success(`Marked as ${newStatus}`);
 
-    await fetchFees(); // refresh UI
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to update status");
-  } finally {
-    setLoadingId(null);
-  }
-};
+      await fetchFees(); // refresh UI
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    } finally {
+      setLoadingId(null);
+    }
+  };
   /* ===== BULK BILL ===== */
 
   const handleBulkGenerate = async () => {
@@ -200,8 +200,8 @@ const handleStatusToggle = async (fee) => {
       setLoading(true);
 
       await apiRequest(API.FEES.BULK_GENERATE, "POST", {
-        month: bulkMonth.trim().toLowerCase(),
-        amount: Number(bulkAmount) ,// ✅ FIXED,
+        month: month.trim().toLowerCase(),
+        amount: Number(bulkAmount),// ✅ FIXED,
         bookingDate,
         timeSlot
       });
@@ -214,76 +214,85 @@ const handleStatusToggle = async (fee) => {
       fetchFees()
 
     } catch (error) {
-     console.error(error);
-
-  const msg =
-    error?.message ||
-    error?.response?.data?.message ||
-    "Something went wrong";
-
-  toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
- /* ===== SINGLE BILL ===== */
-
-  const handleAddBill = async () => {
-    if (!userId || !month || !amount) {
-      toast.error("All fields required");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await apiRequest(API.FEES.ALL, "POST", {
-        studentId: userId,
-        month,
-        amount,
-        bookingDate,
-        timeSlot
-      });
-
-      toast.success("Booking generated");
-
-      setUserId("");
-      setMonth("");
-      setAmount("");
-
-    fetchFees()
-
-    } catch (error) {
       console.error(error);
 
-  const msg =
-    error?.message ||
-    error?.response?.data?.message ||
-    "Something went wrong";
+      const msg =
+        error?.message ||
+        error?.response?.data?.message ||
+        "Something went wrong";
 
-  toast.error(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+  /* ===== SINGLE BILL ===== */
 
+  const handleAddBill = async () => {
+  const cleanMonth = month.trim().toLowerCase();
+
+  if (!userId || !cleanMonth || !amount) {
+    toast.error("All fields required");
+    return;
+  }
+
+  if (Number(amount) <= 0) {
+    toast.error("Amount must be greater than 0");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    await apiRequest(API.FEES.ALL, "POST", {
+      studentId: userId,
+      month: cleanMonth,
+      amount: Number(amount),
+      bookingDate,
+      timeSlot
+    });
+    console.log({
+  studentId: userId,
+  month,
+  amount
+});
+    toast.success("Booking generated");
+
+    setUserId("");
+    setMonth("");
+    setAmount("");
+
+    fetchFees();
+
+  } catch (error) {
+    console.error(error);
+
+    const msg =
+      error?.message ||
+      "Something went wrong";
+
+    toast.error(msg);
+  } finally {
+    setLoading(false);
+  }
+};
   // ================= UI =================
   return (
-  <MainLayout>
-    <div style={wrapper}>
+    <MainLayout>
+      <div style={wrapper}>
 
-      <p style={{ color: "#666" }}>
-        Manage resource bookings and payments
-      </p>
+        <p style={{ color: "#666" }}>
+          Manage resource bookings and payments
+        </p>
 
-      {/* ===== STATS ===== */}
-      <div style={stats}>
-        <div style={{ ...statCard, background: "#3b82f6" }}>Total: {total}</div>
-        <div style={{ ...statCard, background: "#22c55e" }}>Paid: {paid}</div>
-        <div style={{ ...statCard, background: "#f59e0b" }}>Unpaid: {unpaid}</div>
-        <div style={{ ...statCard, background: "#ef4444" }}>Overdue: {overdue}</div>
-      </div>
- {/* ===== FORMS ===== */}
+        {/* ===== STATS ===== */}
+        <div style={stats}>
+          <div style={{ ...statCard, background: "#3b82f6" }}>Total: {total}</div>
+          <div style={{ ...statCard, background: "#22c55e" }}>Paid: {paid}</div>
+          <div style={{ ...statCard, background: "#f59e0b" }}>Unpaid: {unpaid}</div>
+          <div style={{ ...statCard, background: "#ef4444" }}>Overdue: {overdue}</div>
+        </div>
+        {/* ===== FORMS ===== */}
         {role === "admin" && (
           <div style={forms}>
 
@@ -338,169 +347,169 @@ const handleStatusToggle = async (fee) => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />
-<input
-  type="date"
-  value={bookingDate}
-  onChange={(e) => setBookingDate(e.target.value)}
-/>
+              <input
+                type="date"
+                value={bookingDate}
+                onChange={(e) => setBookingDate(e.target.value)}
+              />
 
-<input
-  type="text"
-  placeholder="Time Slot (e.g. 10 AM - 12 PM)"
-  value={timeSlot}
-  onChange={(e) => setTimeSlot(e.target.value)}
-/>
+              <input
+                type="text"
+                placeholder="Time Slot (e.g. 10 AM - 12 PM)"
+                value={timeSlot}
+                onChange={(e) => setTimeSlot(e.target.value)}
+              />
               <button style={btn} onClick={handleAddBill}>
-                  Generate Booking
+                Generate Booking
               </button>
             </div>
 
           </div>
         )}
-      {/* ================= ADMIN VIEW ================= */}
-      {role === "admin" && (
-        <div style={sectionCard}>
-          <h3>All Bookings</h3>
+        {/* ================= ADMIN VIEW ================= */}
+        {role === "admin" && (
+          <div style={sectionCard}>
+            <h3>All Bookings</h3>
 
-          <select
-            style={input}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="overdue">Overdue</option>
-          </select>
+            <select
+              style={input}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="overdue">Overdue</option>
+            </select>
 
-          {Object.keys(groupedFees).length === 0 ? (
-            <p>No records found</p>
-          ) : (
-            Object.entries(groupedFees).map(([studentId, student]) => {
-              const isOpen = expandedStudent === studentId;
+            {Object.keys(groupedFees).length === 0 ? (
+              <p>No records found</p>
+            ) : (
+              Object.entries(groupedFees).map(([studentId, student]) => {
+                const isOpen = expandedStudent === studentId;
 
-              return (
-                <div
-                  key={studentId}
-                  style={{
-                    ...studentCard,
-                    background: isOpen ? "#f1f5f9" : "#fff",
-                    transition: "0.3s"
-                  }}
-                >
-
-                  {/* HEADER */}
+                return (
                   <div
-                    onClick={() => toggleStudent(studentId)}
-                    style={clickableHeader}
-                  >
-                    <h3 style={studentHeader}>{student.name}</h3>
-
-                    <span
-                      style={{
-                        transition: "0.3s",
-                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
-                      }}
-                    >
-                      ▼
-                    </span>
-                  </div>
-
-                  {/* CONTENT */}
-                  <div
+                    key={studentId}
                     style={{
-                 maxHeight: isOpen ? "500px" : "0px",
-overflowY: "auto",
-                      transition: "all 0.3s ease"
+                      ...studentCard,
+                      background: isOpen ? "#f1f5f9" : "#fff",
+                      transition: "0.3s"
                     }}
                   >
-                  
-                    <div style={{ marginTop: 10 }}>
-                      {student.fees.map((fee) => (
-  <div key={fee._id} style={cardItem}>
-    <div style={feeRow}>
-      <span style={{ fontWeight: "600" }}>{fee.month}</span>
-      <span>
-  {fee.bookingDate ? fee.bookingDate.split("T")[0] : "-"}
-</span>
-      <span>{fee.timeSlot|| "-"}</span>
-      <span>₹ {fee.amount}</span>
 
-      <span style={statusStyle(fee.status)}>
-  {fee.status || "unknown"}
-</span>
-      <button
-        style={
-          fee.status?.toLowerCase() === "paid"
-            ? dangerBtn
-            : primaryBtn
-        }
-        disabled={loadingId === fee._id}
-        onClick={() => handleStatusToggle(fee)}
-      >
-        {loadingId === fee._id
-          ? "Updating..."
-          : fee.status?.toLowerCase() === "paid"
-          ? "Mark as Unpaid"
-          : "Mark as Paid"}
-      </button>
-    </div>
-  </div>
-))}
+                    {/* HEADER */}
+                    <div
+                      onClick={() => toggleStudent(studentId)}
+                      style={clickableHeader}
+                    >
+                      <h3 style={studentHeader}>{student.name}</h3>
+
+                      <span
+                        style={{
+                          transition: "0.3s",
+                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
+                        }}
+                      >
+                        ▼
+                      </span>
                     </div>
+
+                    {/* CONTENT */}
+                    <div
+                      style={{
+                        maxHeight: isOpen ? "500px" : "0px",
+                        overflowY: "auto",
+                        transition: "all 0.3s ease"
+                      }}
+                    >
+
+                      <div style={{ marginTop: 10 }}>
+                        {student.fees.map((fee) => (
+                          <div key={fee._id} style={cardItem}>
+                            <div style={feeRow}>
+                              <span style={{ fontWeight: "600" }}>{fee.month}</span>
+                              <span>
+                                {fee.bookingDate ? fee.bookingDate.split("T")[0] : "-"}
+                              </span>
+                              <span>{fee.timeSlot || "-"}</span>
+                              <span>₹ {fee.amount}</span>
+
+                              <span style={statusStyle(fee.status)}>
+                                {fee.status || "unknown"}
+                              </span>
+                              <button
+                                style={
+                                  fee.status?.toLowerCase() === "paid"
+                                    ? dangerBtn
+                                    : primaryBtn
+                                }
+                                disabled={loadingId === fee._id}
+                                onClick={() => handleStatusToggle(fee)}
+                              >
+                                {loadingId === fee._id
+                                  ? "Updating..."
+                                  : fee.status?.toLowerCase() === "paid"
+                                    ? "Mark as Unpaid"
+                                    : "Mark as Paid"}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                   </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {/* ================= STUDENT VIEW ================= */}
+        {role !== "admin" && (
+          <div style={studentCard}>
+
+            <h3>Your Booking History</h3>
+
+            {studentFees.length === 0 ? (
+              <p>No bookings found</p>
+            ) : (
+              studentFees.map((fee) => (
+                <div key={fee._id} style={feeRow}>
+
+                  <span style={{ fontWeight: "600" }}>
+                    {fee.month}
+                  </span>
+
+                  <span>₹ {fee.amount}</span>
+
+                  <span style={statusStyle(fee.status)}>
+                    {fee.status}
+                  </span>
+
+                  {/* Pay button */}
+                  {fee.status?.toLowerCase() !== "paid" ? (
+                    <button
+                      style={btn}
+                      disabled={loadingId === fee._id}
+                      onClick={() => handlePayment(fee)}
+                    >
+                      {loadingId === fee._id ? "..." : "Pay"}
+                    </button>
+                  ) : (
+                    <span style={{ color: "#999" }}>—</span>
+                  )}
 
                 </div>
-              );
-            })
-          )}
-        </div>
-      )}
+              ))
+            )}
 
-      {/* ================= STUDENT VIEW ================= */}
-     {role !== "admin" && (
-  <div style={studentCard}>
-
-    <h3>Your Booking History</h3>
-
-    {studentFees.length === 0 ? (
-      <p>No bookings found</p>
-    ) : (
-      studentFees.map((fee) => (
-       <div key={fee._id} style={feeRow}>
-
-  <span style={{ fontWeight: "600" }}>
-    {fee.month}
-  </span>
-
-  <span>₹ {fee.amount}</span>
-
-  <span style={statusStyle(fee.status)}>
-    {fee.status}
-  </span>
-
-  {/* Pay button */}
-  {fee.status?.toLowerCase() !== "paid" ? (
-    <button
-      style={btn}
-      disabled={loadingId === fee._id}
-      onClick={() => handlePayment(fee)}
-    >
-      {loadingId === fee._id ? "..." : "Pay"}
-    </button>
-  ) : (
-    <span style={{ color: "#999" }}>—</span>
-  )}
-
-</div>
-      ))
-    )}
-
-  </div>
-)}
-    </div>
-  </MainLayout>
-);
+          </div>
+        )}
+      </div>
+    </MainLayout>
+  );
 
 }
 
@@ -614,12 +623,12 @@ const btn = {
 
 
 const statusStyle = (status) => ({
-    color:
+  color:
     status === "paid"
       ? "green"
       : status === "unpaid"
-      ? "orange"
-      : "red",
+        ? "orange"
+        : "red",
   display: "inline-block",
   padding: "4px 10px",
   borderRadius: 20,
