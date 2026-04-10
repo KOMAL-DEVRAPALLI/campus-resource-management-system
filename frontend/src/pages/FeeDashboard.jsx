@@ -135,11 +135,18 @@ const filteredFees =
   filter === "all"
     ? fees
     : fees.filter((f) => f.status?.toLowerCase() === filter);
-  const studentFees = fees
+ const studentFees = fees.filter(f => f.studentId);
 
  const groupedFees = filteredFees.reduce((acc, fee) => {
-  const studentId = fee.studentId?._id || "unknown";
-  const studentName = fee.studentId?.name || "Unknown";
+  const isObject = typeof fee.studentId === "object";
+
+  const studentId = isObject
+    ? fee.studentId._id
+    : fee.studentId || "unknown";
+
+  const studentName = isObject
+    ? fee.studentId.name
+    : "Unknown";
 
   if (!acc[studentId]) {
     acc[studentId] = {
@@ -399,14 +406,15 @@ overflowY: "auto",
   <div key={fee._id} style={cardItem}>
     <div style={feeRow}>
       <span style={{ fontWeight: "600" }}>{fee.month}</span>
-      <span style={fee.bookingDate ? fee.bookingDate.split("T")[0]:"-"}></span>
+      <span>
+  {fee.bookingDate ? fee.bookingDate.split("T")[0] : "-"}
+</span>
       <span>{fee.timeSlot|| "-"}</span>
       <span>₹ {fee.amount}</span>
 
       <span style={statusStyle(fee.status)}>
-        {fee.status}
-      </span>
-
+  {fee.status || "unknown"}
+</span>
       <button
         style={
           fee.status?.toLowerCase() === "paid"
@@ -592,6 +600,12 @@ const btn = {
 
 
 const statusStyle = (status) => ({
+    color:
+    status === "paid"
+      ? "green"
+      : status === "unpaid"
+      ? "orange"
+      : "red",
   display: "inline-block",
   padding: "4px 10px",
   borderRadius: 20,
