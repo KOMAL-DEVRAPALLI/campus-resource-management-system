@@ -122,7 +122,7 @@ const StudentDashboard = () => {
         <>
           {/* ===== CARDS ===== */}
           <div style={cardContainer}>
-            <Card title="Resource" value={roomNumber} color="#3b82f6" icon={<FaBed />} />
+            <Card title="Resource" value={resourceName} color="#3b82f6" icon={<FaBed />} />
             <Card title="Pending Bookings" value={pendingFees} color="#f59e0b" icon={<FaMoneyBillWave />} />
             <Card title="Open Issues" value={openComplaints} color="#ef4444" icon={<FaExclamationCircle />} />
           </div>
