@@ -28,7 +28,7 @@ const StudentListPage = () => {
   const [rooms, setRooms] = useState([]);
 
   const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [selectedRoomId, setSelectedRoomId] = useState("");
+  const [selectedresourceId, setSelectedresourceId] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -100,7 +100,7 @@ const StudentListPage = () => {
 
   const handleAllocateRoom = async () => {
 
-    if (!selectedStudentId || !selectedRoomId) {
+    if (!selectedStudentId || !selectedresourceId) {
       toast.error("Select user and resources");
       return;
     }
@@ -113,7 +113,7 @@ const StudentListPage = () => {
         "POST",
         {
           studentId: selectedStudentId,
-          roomId: selectedRoomId
+          resourceId: selectedresourceId
         }
       );
 
@@ -122,7 +122,7 @@ const StudentListPage = () => {
       loadData();
 
       setSelectedStudentId("");
-      setSelectedRoomId("");
+      setSelectedresourceId("");
 
     } catch (error) {
       toast.error(error.message);
@@ -168,7 +168,7 @@ const StudentListPage = () => {
 
       setStudents(prev =>
         prev.map(s =>
-          s._id === id ? { ...s, roomId: null } : s
+          s._id === id ? { ...s, resourceId: null } : s
         )
       );
 
@@ -217,7 +217,7 @@ const StudentListPage = () => {
                       <th style={thStyle}>Name</th>
                       <th style={thStyle}>Phone</th>
                       <th style={thStyle}>Status</th>
-                      <th style={thStyle}>Resiurce</th>
+                      <th style={thStyle}>Resource</th>
                       <th style={thStyle}>Action</th>
                     </tr>
                   </thead>
@@ -236,15 +236,13 @@ const StudentListPage = () => {
                         </td>
 
                         <td style={tdStyle}>
-                          {student.roomId?.roomNumber
-                            ? `Room ${student.roomId.roomNumber}`
-                            : "Not Assigned"}
+                         {student.resourceId?.resourceName || "Not Assigned"}
                         </td>
 
                         <td style={tdStyle}>
                           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
 
-                            {!student.roomId && (
+                            {!student.resourceId && (
                               <button
                                 style={buttonPrimary}
                                 onClick={() => autoAllocate(student._id)}
@@ -264,7 +262,7 @@ const StudentListPage = () => {
                               Deactivate
                             </button>
 
-                            {student.roomId && (
+                            {student.resourceId && (
                               <button
                                 style={buttonInfoSmall}
                                 onClick={() => handleDeallocate(student._id)}
@@ -298,7 +296,7 @@ const StudentListPage = () => {
                 style={inputStyle}
               >
                 <option value="">Select User</option>
-                {students.filter(s => !s.roomId).map(s => (
+                {students.filter(s => !s.resourceId).map(s => (
                   <option key={s._id} value={s._id}>{s.name}</option>
                 ))}
               </select>
@@ -306,8 +304,8 @@ const StudentListPage = () => {
               <br /><br />
 
               <select
-                value={selectedRoomId}
-                onChange={(e) => setSelectedRoomId(e.target.value)}
+                value={selectedresourceId}
+                onChange={(e) => setSelectedresourceId(e.target.value)}
                 style={inputStyle}
               >
                 <option value="">Select Room</option>
@@ -315,7 +313,7 @@ const StudentListPage = () => {
                   .filter(r => r.status === "active" && r.occupiedCount < r.capacity)
                   .map(r => (
                     <option key={r._id} value={r._id}>
-                      Room {r.roomNumber} ({r.occupiedCount}/{r.capacity})
+                      Room {r.resourceName} ({r.occupiedCount}/{r.capacity})
                     </option>
                   ))}
               </select>

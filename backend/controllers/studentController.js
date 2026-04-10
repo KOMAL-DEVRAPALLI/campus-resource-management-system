@@ -39,7 +39,7 @@ export const addStudent = async (req, res) => {
       phone,
       userId: user._id,
       status: "active",
-      roomId: null,
+      resourceId: null,
     });
 
     res.status(201).json({
@@ -65,7 +65,7 @@ export const getAllStudents = async (req, res) => {
 
     const students = await Student.find({
       status: "active",
-    }).populate("roomId");
+    }).populate("resourceId");
 
     res.status(200).json(students);
 
@@ -88,7 +88,7 @@ export const getMyStudent = async (req, res) => {
     const student = await Student.findOne({
       userId: req.user.id,
       status: "active",
-    }).populate("roomId");
+    }).populate("resourceId");
 
     if (!student) {
       return res.status(404).json({
@@ -159,9 +159,9 @@ export const deactivateStudent = async (req, res) => {
       });
     }
 
-    if (student.roomId) {
+    if (student.resourceId) {
 
-      const room = await Room.findById(student.roomId);
+      const room = await Room.findById(student.resourceId);
 
       if (room && room.occupiedCount > 0) {
         room.occupiedCount -= 1;
@@ -171,7 +171,7 @@ export const deactivateStudent = async (req, res) => {
     }
 
     student.status = "inactive";
-    student.roomId = null;
+    student.resourceId = null;
 
     await student.save();
 
@@ -200,7 +200,7 @@ export const autoAllocateAll = async (req, res) => {
 
     const students = await Student.find({
       status: "active",
-      roomId: null
+      resourceId: null
     });
 
     const rooms = await Room.find({
@@ -217,7 +217,7 @@ export const autoAllocateAll = async (req, res) => {
 
       if (!room) break;
 
-      student.roomId = room._id;
+      student.resourceId = room._id;
       await student.save();
 
       room.occupiedCount += 1;
@@ -258,7 +258,7 @@ export const autoAllocateRoom = async (req, res) => {
       });
     }
 
-    if (student.roomId) {
+    if (student.resourceId) {
       return res.status(400).json({
         message: "Student already has room"
       });
@@ -277,7 +277,7 @@ export const autoAllocateRoom = async (req, res) => {
     }
 
     // assign room
-    student.roomId = room._id;
+    student.resourceId = room._id;
     await student.save();
 
     room.occupiedCount += 1;
@@ -303,20 +303,20 @@ export const deallocateRoom = async (req, res) => {
 
     const student = await Student.findById(studentId);
 
-    if (!student || !student.roomId) {
+    if (!student || !student.resourceId) {
       return res.status(400).json({
         message: "Student has no room",
       });
     }
 
-    const room = await Room.findById(student.roomId);
+    const room = await Room.findById(student.resourceId);
 
     if (room && room.occupiedCount > 0) {
       room.occupiedCount -= 1;
       await room.save();
     }
 
-    student.roomId = null;
+    student.resourceId = null;
     await student.save();
 
     res.status(200).json({
