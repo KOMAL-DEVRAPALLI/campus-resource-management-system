@@ -1,286 +1,191 @@
-import { useEffect, useState } from "react";
-import { apiRequest, apiGet } from "../services/api";
-import { API } from "../services/apiRoutes";
-import MainLayout from "../components/layout/MainLayout";
-import {
-  tableStyle,
-  thStyle,
-  tdStyle,
-  buttonDanger,
-  buttonPrimary,
-  tableContainer
-} from "../styles/uiStyles";
+import Room from "../models/roomModel.js";
 
-import toast from "react-hot-toast";
-import ConfirmDialog from "../components/common/ConfirmDialog";
+/* ================= ADD RESOURCE ================= */
 
-const ResourceManagement = () => {
+export const addRoom = async (req, res) => {
+  try {
 
-  const [rooms, setRooms] = useState([]);
-
-  const [resourceName, setResourceName] = useState("");
-  const [capacity, setCapacity] = useState(""); // ⚠️ keep string
-  const [type, setType] = useState("General");
-
-  const [editId, setEditId] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
-  // ================= FETCH =================
-  const fetchRooms = async () => {
-    try {
-      const data = await apiGet(API.ROOMS.ALL);
-      setRooms(data);
-    } catch {
-      toast.error("Failed to fetch resources");
-    }
-  };
-
-  useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  // ================= VALIDATION =================
-  const validate = () => {
+    const { resourceName, capacity, type } = req.body;
+    console.log("Body",req.body);
+    
     if (!resourceName || !capacity) {
-      toast.error("All fields required");
-      return false;
-    }
-
-    if (Number(capacity) <= 0) {
-      toast.error("Capacity must be greater than 0");
-      return false;
-    }
-
-    return true;
-  };
-
-  // ================= ADD =================
-  const handleAdd = async () => {
-    if (!validate()) return;
-
-    try {
-      setLoading(true);
-
-      await apiRequest(API.ROOMS.ALL, "POST", {
-        resourceName,
-        capacity: Number(capacity), // ✅ convert here
-        type
+      return res.status(400).json({
+        message: "All fields required"
       });
-
-      toast.success("Resource added");
-
-      resetForm();
-      fetchRooms();
-
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
     }
-  };
 
-  // ================= EDIT =================
-  const handleEdit = (room) => {
-    setResourceName(room.resourceName);
-    setCapacity(room.capacity.toString()); // ⚠️ convert to string
-    setType(room.type || "General");
-    setEditId(room._id);
-  };
-
-  // ================= UPDATE =================
-  const handleUpdate = async () => {
-    if (!validate()) return;
-
-    try {
-      setLoading(true);
-
-      await apiRequest(`${API.ROOMS.ALL}/${editId}`, "PUT", {
-        resourceName,
-        capacity: Number(capacity),
-        type
+    if (capacity <= 0) {
+      return res.status(400).json({
+        message: "Capacity must be greater than 0"
       });
-
-      toast.success("Resource updated");
-
-      resetForm();
-      fetchRooms();
-
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ================= DELETE =================
-  const openDeactivateDialog = (id) => {
-    setSelectedId(id);
-    setConfirmOpen(true);
-  };
-
-  const confirmDeactivate = async () => {
-    try {
-      await apiRequest(
-        `${API.ROOMS.ALL}/${selectedId}/deactivate`,
-        "PATCH"
-      );
-
-      toast.success("Resource deactivated");
-      fetchRooms();
-
-    } catch (error) {
-      toast.error(error.message);
     }
 
-    setConfirmOpen(false);
-  };
+    const existing = await Room.findOne({ resourceName });
 
-  // ================= RESET =================
-  const resetForm = () => {
-    setResourceName("");
-    setCapacity("");
-    setType("General");
-    setEditId(null);
-  };
+    if (existing) {
+      return res.status(400).json({
+        message: "Resource already exists"
+      });
+    }
 
-  // ================= UI =================
-  return (
-    <MainLayout>
-      <div style={tableContainer}>
+    const resource = await Room.create({
+      resourceName,
+      capacity,
+      type: type || "General",
+      occupiedCount: 0,
+      status: "active"
+    });
 
-        <h2>Available Resources</h2>
-        <p style={{ color: "#666" }}>
-          Manage campus resources like labs, halls, and equipment
-        </p>
-        <hr />
+    res.status(201).json({
+      message: "Resource added successfully",
+      data: resource
+    });
 
-        {/* ===== TABLE ===== */}
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Name</th>
-              <th style={thStyle}>Type</th>
-              <th style={thStyle}>Capacity</th>
-              <th style={thStyle}>In Use</th>
-              <th style={thStyle}>Status</th>
-              <th style={thStyle}>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {rooms.length === 0 ? (
-              <tr>
-                <td colSpan="6" style={tdStyle}>No resources found</td>
-              </tr>
-            ) : (
-              rooms.map((room) => (
-                <tr key={room._id}>
-
-                  <td style={tdStyle}>{room.resourceName}</td>
-                  <td style={tdStyle}>{room.type || "General"}</td>
-                  <td style={tdStyle}>{room.capacity}</td>
-                  <td style={tdStyle}>{room.occupiedCount}</td>
-
-                  <td style={tdStyle}>
-                    {room.status === "inactive" ? (
-                      <span style={{ color: "gray" }}>Inactive</span>
-                    ) : room.occupiedCount === room.capacity ? (
-                      <span style={{ color: "red" }}>Full</span>
-                    ) : (
-                      <span style={{ color: "green" }}>Available</span>
-                    )}
-                  </td>
-
-                  <td style={tdStyle}>
-                    <button
-                      style={buttonPrimary}
-                      onClick={() => handleEdit(room)}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      style={buttonDanger}
-                      onClick={() => openDeactivateDialog(room._id)}
-                    >
-                      Deactivate
-                    </button>
-                  </td>
-
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-
-        <hr style={{ margin: "20px 0", opacity: 0.2 }} />
-
-        {/* ===== FORM ===== */}
-        <h3>{editId ? "Update Resource" : "Add Resource"}</h3>
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-
-          <input
-            placeholder="Resource Name"
-            value={resourceName}
-            onChange={(e) => setResourceName(e.target.value)}
-          />
-
-          <input
-            type="number"
-            placeholder="Capacity"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-          />
-
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-          >
-            <option>Electronics</option>
-            <option>Lab</option>
-            <option>Hall</option>
-            <option>General</option>
-          </select>
-
-        </div>
-
-        <br />
-
-        {editId ? (
-          <button
-            style={buttonPrimary}
-            onClick={handleUpdate}
-            disabled={loading}
-          >
-            Update Resource
-          </button>
-        ) : (
-          <button
-            style={buttonPrimary}
-            onClick={handleAdd}
-            disabled={loading}
-          >
-            Add Resource
-          </button>
-        )}
-
-      </div>
-
-      {/* ===== CONFIRM MODAL ===== */}
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Deactivate Resource"
-        message="Are you sure you want to deactivate this resource?"
-        onConfirm={confirmDeactivate}
-        onCancel={() => setConfirmOpen(false)}
-      />
-
-    </MainLayout>
-  );
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
 };
 
-export default ResourceManagement;
+
+/* ================= GET ALL RESOURCES ================= */
+
+export const getAllRooms = async (req, res) => {
+  try {
+
+    const resources = await Room.find();
+
+    // ✅ Add computed status (smart logic)
+    const updated = resources.map(r => {
+
+      let utilizationStatus = "available";
+
+      if (r.occupiedCount === 0) {
+        utilizationStatus = "available";
+      } else if (r.occupiedCount < r.capacity) {
+        utilizationStatus = "in-use";
+      } else {
+        utilizationStatus = "full";
+      }
+
+      return {
+        ...r._doc,
+        utilizationStatus
+      };
+    });
+
+    res.status(200).json(updated);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching resources"
+    });
+  }
+};
+
+
+/* ================= UPDATE RESOURCE ================= */
+
+export const updateRoom = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+    const { resourceName, capacity, type } = req.body;
+
+    const resource = await Room.findById(id);
+
+    if (!resource) {
+      return res.status(404).json({
+        message: "Resource not found"
+      });
+    }
+
+    // 🔁 Duplicate check
+    if (resourceName && resourceName !== resource.resourceName) {
+
+      const duplicate = await Room.findOne({ resourceName });
+
+      if (duplicate) {
+        return res.status(400).json({
+          message: "Resource name already exists"
+        });
+      }
+
+      resource.resourceName = resourceName;
+    }
+
+    // 🔁 Capacity validation
+    if (capacity !== undefined) {
+
+      if (capacity <= 0) {
+        return res.status(400).json({
+          message: "Capacity must be greater than 0"
+        });
+      }
+
+      if (capacity < resource.occupiedCount) {
+        return res.status(400).json({
+          message: "Capacity cannot be less than usage"
+        });
+      }
+
+      resource.capacity = capacity;
+    }
+
+    // 🔁 Update type
+    if (type) {
+      resource.type = type;
+    }
+
+    await resource.save();
+
+    res.status(200).json({
+      message: "Resource updated successfully",
+      data: resource
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
+
+
+/* ================= DEACTIVATE RESOURCE ================= */
+
+export const deactivateRoom = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const resource = await Room.findById(id);
+
+    if (!resource) {
+      return res.status(404).json({
+        message: "Resource not found"
+      });
+    }
+
+    if (resource.occupiedCount > 0) {
+      return res.status(400).json({
+        message: "Cannot deactivate resource in use"
+      });
+    }
+
+    resource.status = "inactive";
+
+    await resource.save();
+
+    res.status(200).json({
+      message: "Resource deactivated",
+      data: resource
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
