@@ -214,7 +214,14 @@ const handleStatusToggle = async (fee) => {
       fetchFees()
 
     } catch (error) {
-      toast.error(error.message);
+     console.error(error);
+
+  const msg =
+    error?.message ||
+    error?.response?.data?.message ||
+    "Something went wrong";
+
+  toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -247,7 +254,14 @@ const handleStatusToggle = async (fee) => {
     fetchFees()
 
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+
+  const msg =
+    error?.message ||
+    error?.response?.data?.message ||
+    "Something went wrong";
+
+  toast.error(msg);
     } finally {
       setLoading(false);
     }
