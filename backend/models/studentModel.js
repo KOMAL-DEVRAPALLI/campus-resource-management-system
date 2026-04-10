@@ -13,11 +13,11 @@ const studentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  roomId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Room",
-    default: null,
-  },
+  resourceId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Room",
+  default: null
+},
   status: {
     type: String,
     default: "active",

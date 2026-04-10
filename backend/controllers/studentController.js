@@ -58,9 +58,12 @@ export const addStudent = async (req, res) => {
 export const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find({
-      status: "active",
-    }).populate("resourceId", "resourceName"); // ✅ clean populate
-
+  status: "active",
+}).populate({
+  path: "resourceId",
+  select: "resourceName",
+  options: { strictPopulate: false } // 🔥 prevents crash
+});
     res.status(200).json(students);
 
   } catch (error) {
