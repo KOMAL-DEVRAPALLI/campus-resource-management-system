@@ -10,7 +10,6 @@ import {
   buttonPrimary,
   tableContainer
 } from "../styles/uiStyles";
-import "../styles/animations.css";
 import toast from "react-hot-toast";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 
