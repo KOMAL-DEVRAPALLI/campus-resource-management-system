@@ -19,7 +19,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Tooltip,
   Legend,
 } from "recharts";
 import { ResponsiveContainer } from "recharts";
