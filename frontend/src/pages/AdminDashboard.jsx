@@ -212,7 +212,7 @@ setChartData(dashboard)
         <Legend />
 
         {/* 🔥 TOOLTIP ADD */}
-        <Tooltip formatter={(value) => `₹ ${value}`}/>
+        <Tooltip formatter={(value) => `${value} bookings`}/>
 
       </PieChart>
     </ResponsiveContainer>
