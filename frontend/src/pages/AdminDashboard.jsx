@@ -21,7 +21,6 @@ import {
   Cell,
   Tooltip,
   Legend,
-  ResponsiveContainer
 } from "recharts";
 import { ResponsiveContainer } from "recharts";
 
