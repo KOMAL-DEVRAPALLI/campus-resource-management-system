@@ -17,7 +17,11 @@ import {
   YAxis,
   Tooltip,
   PieChart,
-  Pie
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from "recharts";
 import { ResponsiveContainer } from "recharts";
 
